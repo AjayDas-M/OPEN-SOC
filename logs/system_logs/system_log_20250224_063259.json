@@ -1,0 +1,153 @@
+{
+    "hostname": "MSI",
+    "timestamp": "2025-02-24 06:32:58.152574",
+    "cpu_usage": 5.5,
+    "memory_usage": 15.9,
+    "disk_usage": 0.3,
+    "running_processes": [
+        {
+            "name": "systemd",
+            "pid": 1
+        },
+        {
+            "name": "init-systemd(Ub",
+            "pid": 2
+        },
+        {
+            "name": "init",
+            "pid": 7
+        },
+        {
+            "name": "systemd-journald",
+            "pid": 52
+        },
+        {
+            "name": "systemd-udevd",
+            "pid": 94
+        },
+        {
+            "name": "systemd-resolved",
+            "pid": 148
+        },
+        {
+            "name": "systemd-timesyncd",
+            "pid": 149
+        },
+        {
+            "name": "cron",
+            "pid": 158
+        },
+        {
+            "name": "dbus-daemon",
+            "pid": 159
+        },
+        {
+            "name": "systemd-logind",
+            "pid": 166
+        },
+        {
+            "name": "wsl-pro-service",
+            "pid": 169
+        },
+        {
+            "name": "agetty",
+            "pid": 174
+        },
+        {
+            "name": "agetty",
+            "pid": 179
+        },
+        {
+            "name": "rsyslogd",
+            "pid": 183
+        },
+        {
+            "name": "unattended-upgr",
+            "pid": 196
+        },
+        {
+            "name": "login",
+            "pid": 295
+        },
+        {
+            "name": "systemd",
+            "pid": 346
+        },
+        {
+            "name": "(sd-pam)",
+            "pid": 347
+        },
+        {
+            "name": "bash",
+            "pid": 358
+        },
+        {
+            "name": "SessionLeader",
+            "pid": 505
+        },
+        {
+            "name": "Relay(507)",
+            "pid": 506
+        },
+        {
+            "name": "bash",
+            "pid": 507
+        },
+        {
+            "name": "packagekitd",
+            "pid": 1057
+        },
+        {
+            "name": "polkitd",
+            "pid": 1062
+        },
+        {
+            "name": "sudo",
+            "pid": 2126
+        },
+        {
+            "name": "sudo",
+            "pid": 2127
+        },
+        {
+            "name": "python3",
+            "pid": 2128
+        },
+        {
+            "name": "sh",
+            "pid": 2129
+        },
+        {
+            "name": "sh",
+            "pid": 2130
+        },
+        {
+            "name": "sh",
+            "pid": 2131
+        },
+        {
+            "name": "python3",
+            "pid": 2132
+        },
+        {
+            "name": "sh",
+            "pid": 2133
+        },
+        {
+            "name": "sudo",
+            "pid": 2134
+        },
+        {
+            "name": "python3",
+            "pid": 2136
+        },
+        {
+            "name": "sudo",
+            "pid": 2137
+        },
+        {
+            "name": "python3",
+            "pid": 2138
+        }
+    ]
+}
