@@ -6,7 +6,7 @@ import gridfs
 from datetime import datetime
 
 # MongoDB connection string
-MONGO_URI = "mongodb+srv://admin:admin123@cluster0.s5qtd.mongodb.net/"
+MONGO_URI = "mongodb+srv://admin:admin123@cluster0.s5qtd.mongodb.net"
 DATABASE_NAME = "SOCPlatform"
 COLLECTION_NAME = "Logs"
 PROCESSED_FILES_COLLECTION = "ProcessedFiles"
@@ -17,6 +17,14 @@ db = client[DATABASE_NAME]
 collection = db[COLLECTION_NAME]
 fs = gridfs.GridFS(db)
 processed_files_col = db[PROCESSED_FILES_COLLECTION]  # To track inserted files
+
+# Define log directories
+LOG_DIRS = {
+    "system_logs": "logs/system_logs/*.json",
+    "network_logs": "logs/network_logs/*.pcap",
+    "firewall_logs": "logs/firewall_logs/*.json",
+    "external_logs": "logs/external_logs/*.json"
+}
 
 # Function to check if a file was already inserted
 def is_file_processed(filename):
@@ -35,46 +43,29 @@ def store_file_in_gridfs(filepath):
 # Function to insert logs into MongoDB
 def insert_logs():
     timestamp = datetime.now().isoformat()
+    logs = {"timestamp": timestamp, "system_logs": None, "network_logs": None, "firewall_logs": None, "external_logs": None}
 
-    # Collect logs from files
-    logs = {
-        "timestamp": timestamp,
-        "system_logs": None,
-        "network_logs": None,
-        "firewall_logs": None,
-        "external_logs": None
-    }
+    for log_type, log_pattern in LOG_DIRS.items():
+        log_files = glob.glob(log_pattern)
 
-    # Process system logs (JSON)
-    for file in glob.glob("logs/system_log_*.json"):
-        if not is_file_processed(file):
-            logs["system_logs"] = store_file_in_gridfs(file)
-            mark_file_as_processed(file)
+        for log_file in log_files:
+            if not is_file_processed(log_file):
+                if log_type == "network_logs":  # PCAP files
+                    logs[log_type] = store_file_in_gridfs(log_file)
+                else:  # JSON logs
+                    with open(log_file, "r") as file:
+                        try:
+                            data = json.load(file)
+                            logs[log_type] = data
+                        except json.JSONDecodeError:
+                            print(f"Error decoding JSON in file: {log_file}")
 
-    # Process network logs (PCAP)
-    for file in glob.glob("logs/network_log_*.pcap"):
-        if not is_file_processed(file):
-            logs["network_logs"] = store_file_in_gridfs(file)
-            mark_file_as_processed(file)
-
-    # Process firewall logs (JSON)
-    for file in glob.glob("logs/firewall_log_*.json"):
-        if not is_file_processed(file):
-            logs["firewall_logs"] = store_file_in_gridfs(file)
-            mark_file_as_processed(file)
-
-    # Process external logs (JSON)
-    for file in glob.glob("logs/external_log_*.json"):
-        if not is_file_processed(file):
-            logs["external_logs"] = store_file_in_gridfs(file)
-            mark_file_as_processed(file)
+                mark_file_as_processed(log_file)
 
     # Insert log metadata into MongoDB
     collection.insert_one(logs)
-    print("Logs inserted with file references:", logs)
+    print("Logs inserted into MongoDB:", logs)
 
 # Run the function
 if __name__ == "__main__":
     insert_logs()
-
-    print("Log collection complete.")

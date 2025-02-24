@@ -4,8 +4,8 @@ import os
 from datetime import datetime
 
 # Create logs directory if not exists
-if not os.path.exists("logs"):
-    os.makedirs("logs")
+if not os.path.exists("logs/system_logs"):
+    os.makedirs("logs/system_logs")
 
 # Function to collect system logs
 def collect_system_logs():
@@ -19,7 +19,7 @@ def collect_system_logs():
     }
 
     # Save log to file
-    log_filename = f"logs/system_log_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+    log_filename = f"logs/system_logs/system_log_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
     with open(log_filename, "w") as file:
         json.dump(log_data, file, indent=4)
 

@@ -6,12 +6,12 @@ from datetime import datetime
 LOG_FILE_PATH = "/var/log/iptables.log"  # Change to /var/log/syslog if necessary
 
 # Create logs directory if not exists
-if not os.path.exists("logs"):
-    os.makedirs("logs")
+if not os.path.exists("logs/firewall_logs"):
+    os.makedirs("logs/firewall_logs")
 
 # Function to extract firewall logs
 def collect_firewall_logs():
-    log_filename = f"logs/firewall_log_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+    log_filename = f"logs/firewall_logs/firewall_log_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
 
     try:
         with open(LOG_FILE_PATH, "r") as file:
