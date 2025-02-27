@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script>
+        function toggleDetails(logId) {
+            var details = document.getElementById(logId);
+            if (details.style.display === "none") {
+                details.style.display = "block";
+            } else {
+                details.style.display = "none";
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>OPEN-SOC: Log Collector Application</h1>
+        <form action="/collect_logs" method="get">
+            <button type="submit">Collect Logs</button>
+        </form>
+        
+        <h2>Logs</h2>
+        <div id="logs">
+            {% if logs %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>Log Type</th>
+                            <th>Details</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for log in logs %}
+                        <tr>
+                            <td>{{ log.timestamp }}</td>
+                            <td>
+                                {% if log.system_logs %}
+                                    System Logs
+                                {% elif log.network_logs %}
+                                    Network Logs
+                                {% elif log.firewall_logs %}
+                                    Firewall Logs
+                                {% elif log.external_logs %}
+                                    External Logs
+                                {% else %}
+                                    Unknown Log Type
+                                {% endif %}
+                            </td>
+                            <td>
+                                <button onclick="toggleDetails('details-{{ loop.index }}')">Toggle Details</button>
+                                <div id="details-{{ loop.index }}" style="display:none;">
+                                    {% if log.system_logs %}
+                                        <pre>{{ log.system_logs | tojson(indent=2) }}</pre>
+                                    {% elif log.network_logs %}
+                                        <p>This log is in PCAP format. <a href="{{ url_for('download_pcap', filename=log.network_logs) }}">Download PCAP</a></p>
+                                    {% elif log.firewall_logs %}
+                                        <pre>{{ log.firewall_logs | tojson(indent=2) }}</pre>
+                                    {% elif log.external_logs %}
+                                        <pre>{{ log.external_logs | tojson(indent=2) }}</pre>
+                                    {% else %}
+                                        <p>No details available.</p>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>No logs available.</p>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>
