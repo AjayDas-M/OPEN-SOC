@@ -41,6 +41,8 @@ button:hover {
     padding: 10px;
     background-color: #e9ecef;
     border-radius: 5px;
+    max-height: 300px; /* Limit height for scrolling */
+    overflow-y: auto; /* Enable vertical scrolling */
 }
 
 table {
@@ -64,13 +66,5 @@ pre {
     word-wrap: break-word; /* Break long words */
     background-color: #f8f9fa;
     padding: 10px;
-    border-radius: 5px;
-}
-
-.details {
-    margin-top: 10px;
-    padding: 10px;
-    background-color: #f0f0f0;
-    border: 1px solid #ddd;
     border-radius: 5px;
 }
