@@ -4,9 +4,14 @@ import glob
 import os
 import gridfs
 from datetime import datetime
+import logging
 
-# MongoDB connection string
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+# MongoDB connection string (should be externalized to environment variables)
 MONGO_URI = "mongodb+srv://admin:admin123@cluster0.s5qtd.mongodb.net"
+
 DATABASE_NAME = "SOCPlatform"
 COLLECTION_NAME = "Logs"
 PROCESSED_FILES_COLLECTION = "ProcessedFiles"
@@ -36,9 +41,14 @@ def mark_file_as_processed(filename):
 
 # Function to store logs in GridFS
 def store_file_in_gridfs(filepath):
-    with open(filepath, "rb") as file:
-        file_id = fs.put(file, filename=os.path.basename(filepath))
-    return file_id
+    try:
+        with open(filepath, "rb") as file:
+            file_id = fs.put(file, filename=os.path.basename(filepath))
+            logging.info(f"File stored in GridFS: {os.path.basename(filepath)}")
+        return file_id
+    except Exception as e:
+        logging.error(f"Error storing file in GridFS: {e}")
+        return None
 
 # Function to insert logs into MongoDB
 def insert_logs():
@@ -62,9 +72,12 @@ def insert_logs():
 
                 mark_file_as_processed(log_file)
 
-    # Insert log metadata into MongoDB
-    collection.insert_one(logs)
-    print("Logs inserted into MongoDB:", logs)
+    try:
+        # Insert log metadata into MongoDB
+        collection.insert_one(logs)
+        logging.info("Logs successfully inserted into MongoDB")
+    except Exception as e:
+        logging.error(f"Error inserting logs into MongoDB: {str(e)}")
 
 # Run the function
 if __name__ == "__main__":
