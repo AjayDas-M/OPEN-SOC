@@ -1,16 +1,17 @@
 import subprocess
 import logging
+import time
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Define log collection scripts with timeout (in seconds)
 scripts = [
-    {"command": "python3 ./collectors/system_log_collector.py", "timeout": 300},
-    {"command": "sudo python3 ./collectors/network_log_collector.py", "timeout": 600},
-    {"command": "python3 ./collectors/firewall_log_collector.py", "timeout": 300},
-    {"command": "python3 ./collectors/external_log_collector.py", "timeout": 300},
-    {"command": "python3 ./collectors/store_logs_mongodb.py", "timeout": 600}
+    {"command": "python3 collectors/system_log_collector.py", "timeout": 300},
+    {"command": "sudo python3 collectors/network_log_collector.py", "timeout": 600},
+    {"command": "python3 collectors/firewall_log_collector.py", "timeout": 300},
+    {"command": "python3 collectors/external_log_collector.py", "timeout": 300},
+    {"command": "python3 collectors/store_logs_mongodb.py", "timeout": 600}
 ]
 
 # Run all scripts in parallel with timeout handling
@@ -22,6 +23,7 @@ for script in scripts:
         logging.info(f"Started script: {script['command']} (timeout: {script['timeout']}s)")
     except Exception as e:
         logging.error(f"Failed to start script {script['command']}: {str(e)}")
+        logging.error(f"Error details: {e.__class__.__name__} - {str(e)}")
 
 # Wait for all scripts to finish with timeout handling
 for proc_info in processes:
