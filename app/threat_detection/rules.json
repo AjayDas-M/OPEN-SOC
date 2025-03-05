@@ -1,0 +1,14 @@
+{
+    "failed_login_attempts": {
+      "enabled": true,
+      "threshold": 5,
+      "time_window": 10
+    },
+    "data_exfiltration": {
+      "enabled": true,
+      "threshold": 104857600
+    },
+    "blacklisted_ips": ["192.168.1.100", "10.0.0.5", "8.8.8.8"],
+    "whitelisted_users": ["admin", "security_team"]
+  }
+  
