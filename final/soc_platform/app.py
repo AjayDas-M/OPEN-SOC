@@ -37,14 +37,14 @@ app.permanent_session_lifetime = timedelta(hours=1)  # Session expires in 1 hour
 # MongoDB connection details
 username = urllib.parse.quote_plus("admin_user")
 password = urllib.parse.quote_plus("@admin_user")
-cluster_name = "Cluster0"
+cluster_name = "sop"
 
 # MongoDB client connection
 try:
-    uri = f"mongodb+srv://{username}:{password}@{cluster_name}.yuk7c.mongodb.net/?retryWrites=true&w=majority&appName={cluster_name}"
-    client = MongoClient(uri)
+    uri = f"mongodb+srv://{username}:{password}@{cluster_name}.y49v4.mongodb.net/?retryWrites=true&w=majority&appName={cluster_name}"
+    client = MongoClient(uri, serverSelectionTimeoutMS=60000)
     db = client["log_dashboard"]
-    print("[âœ…] MongoDB connected successfully!")
+    print("[✅] MongoDB connected successfully!")
 except Exception as e:
     print(f"[!] MongoDB Connection Error: {e}")
     sys.exit(1)
