@@ -654,43 +654,69 @@ function isolateIP() {
     .catch(error => alert("⚠ Error isolating IP: " + error));
 }
 
-    const socket = io();
+const socket = io();
 
-        // Listen for new external logs
-    socket.on('new_external_log', function(data) {
+// Listen for new external logs
+socket.on('new_external_log', function(data) {
     const externalLogsSection = document.querySelector(".external-logs");
 
-    // Create a new log entry for the external system
-    let logBox = document.createElement("div");
-    logBox.classList.add("main-box");
-    logBox.innerHTML = `
-    <div class="computer-name">${data.system_name}</div>
-        <div class="container">
-            <div class="log-section">
-                <h2>Logs</h2>
-            <div class="log-content">
-    ${Object.entries(data.logs).map(([category, details]) => `
-        <div class="log-entry">
-            <div class="log-category">${category}</div>
-                <div class="log-text">${details.logs || "No logs available."}</div>
-                    </div>`).join('')}
-                    </div>
-                    </div>
-        <div class="threat-section">
-        <h2>Detected Threats & Mitigations</h2>
-    ${data.detected_threats.length > 0 ? data.detected_threats.map(threat => `
-        <div class="threat-entry">
-            <div class="threat-title">Threat: ${threat.type} (${threat.severity})</div>
-            <div class="log-text">Log: ${threat.log}</div>
-            <div class="threat-mitigation">Mitigation: ${threat.mitigation}</div>
-            <div class="threat-action">Action: ${threat.action}</div>
-            </div>`).join('') : '<p class="no-threat">✅ No threats detected.</p>'}
-                    </div>
-                    </div>`;
+    // Check if the system already exists
+    let existingSystem = [...externalLogsSection.querySelectorAll(".main-box")]
+        .find(box => box.querySelector(".computer-name")?.textContent.trim() === data.system_name);
 
-                // Append new log box at the top
-    externalLogsSection.prepend(logBox);
-    });
+    if (existingSystem) {
+        // Update existing logs
+        let logContent = existingSystem.querySelector(".log-content");
+        logContent.innerHTML = Object.entries(data.logs).map(([category, details]) => `
+            <div class="log-entry">
+                <div class="log-category">${category}</div>
+                <div class="log-text">${details.logs || "No logs available."}</div>
+            </div>`).join('');
+
+        // Update threats section
+        let threatSection = existingSystem.querySelector(".threat-section");
+        threatSection.innerHTML = `
+            <h2>Detected Threats & Mitigations</h2>
+            ${data.detected_threats.length > 0 ? data.detected_threats.map(threat => `
+                <div class="threat-entry">
+                    <div class="threat-title">Threat: ${threat.type} (${threat.severity})</div>
+                    <div class="log-text">Log: ${threat.log}</div>
+                    <div class="threat-mitigation">Mitigation: ${threat.mitigation}</div>
+                    <div class="threat-action">Action: ${threat.action}</div>
+                </div>`).join('') : '<p class="no-threat">✅ No threats detected.</p>'}`;
+    } else {
+        // Create a new log entry if system is not found
+        let logBox = document.createElement("div");
+        logBox.classList.add("main-box");
+        logBox.innerHTML = `
+            <div class="computer-name">${data.system_name}</div>
+            <div class="container">
+                <div class="log-section">
+                    <h2>Logs</h2>
+                    <div class="log-content">
+                        ${Object.entries(data.logs).map(([category, details]) => `
+                            <div class="log-entry">
+                                <div class="log-category">${category}</div>
+                                <div class="log-text">${details.logs || "No logs available."}</div>
+                            </div>`).join('')}
+                    </div>
+                </div>
+                <div class="threat-section">
+                    <h2>Detected Threats & Mitigations</h2>
+                    ${data.detected_threats.length > 0 ? data.detected_threats.map(threat => `
+                        <div class="threat-entry">
+                            <div class="threat-title">Threat: ${threat.type} (${threat.severity})</div>
+                            <div class="log-text">Log: ${threat.log}</div>
+                            <div class="threat-mitigation">Mitigation: ${threat.mitigation}</div>
+                            <div class="threat-action">Action: ${threat.action}</div>
+                        </div>`).join('') : '<p class="no-threat">✅ No threats detected.</p>'}
+                </div>
+            </div>`;
+
+        // Append new log box at the top
+        externalLogsSection.prepend(logBox);
+    }
+});
 
 
     
