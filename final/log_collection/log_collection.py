@@ -96,7 +96,7 @@ def collect_logs():
 
     return log_data
 
-API_IP = "http://192.168.154.230:5000/api/logs"  # Replace with your API IP and port
+API_IP = "http://192.168.68.112:5000/api/logs"  # Replace with your API IP and port
 
 def send_logs():
     logs = collect_logs()
