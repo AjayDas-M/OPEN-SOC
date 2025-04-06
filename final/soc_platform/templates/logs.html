@@ -657,12 +657,25 @@ function isolateIP() {
 const socket = io();
 
 // Listen for new external logs
-socket.on('new_external_log', function(data) {
+ssocket.on('new_external_log', function(data) {
     const externalLogsSection = document.querySelector(".external-logs");
 
-    // Check if the system already exists using a reliable data attribute
-    let existingSystem = [...externalLogsSection.querySelectorAll(".main-box")]
-        .find(box => box.getAttribute("data-system") === data.system_name);
+    const normalizeName = name => name?.trim().toLowerCase();
+    const normalizedName = normalizeName(data.system_name);
+
+    // Remove any duplicate entries manually (keeping just one)
+    const allSystemBoxes = [...externalLogsSection.querySelectorAll(".main-box")];
+    const matchingBoxes = allSystemBoxes.filter(
+        box => normalizeName(box.getAttribute("data-system")) === normalizedName
+    );
+
+    // Keep only the first, remove others (duplicates)
+    if (matchingBoxes.length > 1) {
+        matchingBoxes.slice(1).forEach(dup => dup.remove());
+    }
+
+    // After cleanup, check again
+    let existingSystem = matchingBoxes[0] || null;
 
     if (existingSystem) {
         // Update existing logs
@@ -685,10 +698,10 @@ socket.on('new_external_log', function(data) {
                     <div class="threat-action">Action: ${threat.action}</div>
                 </div>`).join('') : '<p class="no-threat">✅ No threats detected.</p>'}`;
     } else {
-        // Create a new log entry if system is not found
+        // Create a new log entry
         let logBox = document.createElement("div");
         logBox.classList.add("main-box");
-        logBox.setAttribute("data-system", data.system_name);  // <-- Unique identifier for deduplication
+        logBox.setAttribute("data-system", normalizedName);
 
         logBox.innerHTML = `
             <div class="computer-name">${data.system_name}</div>
@@ -715,7 +728,6 @@ socket.on('new_external_log', function(data) {
                 </div>
             </div>`;
 
-        // Append new log box at the top
         externalLogsSection.prepend(logBox);
     }
 });
