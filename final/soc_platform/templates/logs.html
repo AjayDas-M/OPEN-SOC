@@ -660,9 +660,9 @@ const socket = io();
 socket.on('new_external_log', function(data) {
     const externalLogsSection = document.querySelector(".external-logs");
 
-    // Check if the system already exists
+    // Check if the system already exists using a reliable data attribute
     let existingSystem = [...externalLogsSection.querySelectorAll(".main-box")]
-        .find(box => box.querySelector(".computer-name")?.textContent.trim() === data.system_name);
+        .find(box => box.getAttribute("data-system") === data.system_name);
 
     if (existingSystem) {
         // Update existing logs
@@ -688,6 +688,8 @@ socket.on('new_external_log', function(data) {
         // Create a new log entry if system is not found
         let logBox = document.createElement("div");
         logBox.classList.add("main-box");
+        logBox.setAttribute("data-system", data.system_name);  // <-- Unique identifier for deduplication
+
         logBox.innerHTML = `
             <div class="computer-name">${data.system_name}</div>
             <div class="container">
@@ -717,6 +719,7 @@ socket.on('new_external_log', function(data) {
         externalLogsSection.prepend(logBox);
     }
 });
+
 
 
     
