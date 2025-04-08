@@ -44,6 +44,7 @@ try:
     uri = f"mongodb+srv://{username}:{password}@{cluster_name}.y49v4.mongodb.net/?retryWrites=true&w=majority&appName={cluster_name}"
     client = MongoClient(uri, serverSelectionTimeoutMS=60000)
     db = client["log_dashboard"]
+    print(uri)  # Fixed typo: changed from print(ur) to print(uri)
     print("[✅] MongoDB connected successfully!")
 except Exception as e:
     print(f"[!] MongoDB Connection Error: {e}")
@@ -408,7 +409,7 @@ import io
 
 # *List of all log collections*
 log_collections = [
-    "access_logs", "application_logs", "audit_logs", "crash_logs",
+    "access_logs", "application_logs", "audit_logs", "crash_logs", 
     "database_logs", "external_logs", "firewall_logs", "kernel_logs",
     "network_logs", "security_logs", "system_logs", "user_activity_logs"
 ]
@@ -556,19 +557,29 @@ def display_logs():
     # Get the admin system's name
     system_name = platform.node()
 
-    # Fetch external system logs from MongoDB
-    external_logs = db.external_logs.aggregate([
-    # Your existing aggregation pipeline
-], allowDiskUse=True)  # Enable disk-based sorting  # Exclude _id
-
-    # Format external logs: Each system has its own logs and threats
-    formatted_external_logs = {
-        entry["system_name"]: {
-            "logs": entry["logs"],
-            "detected_threats": entry.get("detected_threats", [])
-        }
-        for entry in external_logs
-    }
+    # Fetch external system logs from MongoDB with proper sorting
+    try:
+        external_logs = list(db.external_logs.find().sort("timestamp", -1).limit(100))
+        
+        # Format external logs: Each system has its own logs and threats
+        formatted_external_logs = {}
+        for entry in external_logs:
+            system_entry = entry.get("system_name")
+            if system_entry:
+                # Format timestamp for display if it's a datetime object
+                if isinstance(entry.get("timestamp"), datetime):
+                    entry["display_timestamp"] = entry["timestamp"].strftime("%Y-%m-%d %H:%M:%S")
+                else:
+                    entry["display_timestamp"] = entry.get("timestamp", "Unknown")
+                    
+                formatted_external_logs[system_entry] = {
+                    "logs": entry.get("logs", {}),
+                    "detected_threats": entry.get("detected_threats", []),
+                    "timestamp": entry.get("display_timestamp")
+                }
+    except Exception as e:
+        print(f"Error fetching external logs: {e}")
+        formatted_external_logs = {}
 
     return render_template(
         'logs.html',
@@ -578,56 +589,80 @@ def display_logs():
     )
 
 
+
 @app.route('/api/logs', methods=['POST'])
 def receive_logs():
     try:
-        data = request.get_json()
-
+        # First try to parse as JSON directly
+        try:
+            data = request.get_json()
+        except:
+            # Fallback: parse raw data if JSON parsing fails
+            raw_data = request.data.decode('utf-8')
+            data = json.loads(raw_data)
+ 
         # Validate incoming data
         if not data or 'system_name' not in data or 'logs' not in data:
             return jsonify({"error": "Invalid data format"}), 400
-
+ 
         system_name = data['system_name']
         raw_logs = data['logs']
-        timestamp = data.get('timestamp', datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-
-        print(f"[✅] Received logs from {system_name}. Processing and storing...")
-
-        # ✅ Process logs the same way as admin system logs
+        timestamp = datetime.now()
+ 
+        # Convert all string timestamps to datetime objects if needed
         processed_logs = {}
         for category, log_content in raw_logs.items():
-            processed_logs[category] = {
-                "timestamp": timestamp,
-                "logs": log_content
-            }
-
-        # ✅ Detect threats
+            if isinstance(log_content, dict):
+                # Handle case where timestamp might be a string
+                log_timestamp = log_content.get('timestamp')
+                if isinstance(log_timestamp, str):
+                    try:
+                        log_timestamp = datetime.strptime(log_timestamp, "%Y-%m-%d %H:%M:%S")
+                    except ValueError:
+                        log_timestamp = timestamp
+                
+                processed_logs[category] = {
+                    "timestamp": log_timestamp if log_timestamp else timestamp,
+                    "logs": log_content.get('logs', '')
+                }
+ 
+        # Detect threats (original logic remains unchanged)
         detected_threats = detect_threats(str(raw_logs))
-
-        # ✅ Store logs in MongoDB like admin system logs
+ 
+        # Store in MongoDB (with proper datetime handling)
         db.external_logs.insert_one({
             "system_name": system_name,
             "logs": processed_logs,
             "timestamp": timestamp,
             "detected_threats": detected_threats
-            }
-            )
-
-        # ✅ Send logs to frontend for real-time display
+        })
+ 
+        # Send to frontend (convert datetime to string for JSON)
         socketio.emit('new_external_log', {
             "system_name": system_name,
-            "logs": processed_logs,
+            "logs": {
+                k: {
+                    "timestamp": v["timestamp"].strftime("%Y-%m-%d %H:%M:%S"),
+                    "logs": v["logs"]
+                } for k, v in processed_logs.items()
+            },
             "detected_threats": detected_threats,
-            "timestamp": timestamp
+            "timestamp": timestamp.strftime("%Y-%m-%d %H:%M:%S")
         }, namespace='/')
-
-        print(f"[✅] Logs from {system_name} stored in MongoDB and sent to frontend.")
-
-        return jsonify({"status": "success", "message": "Logs processed, stored, and broadcasted"}), 200
-
+ 
+        return jsonify({
+            "status": "success",
+            "message": "Logs processed and stored",
+            "timestamp": timestamp.strftime("%Y-%m-%d %H:%M:%S")
+        }), 200
+ 
     except Exception as e:
-        print(f"[!] Error processing external logs: {e}")
-        return jsonify({"error": str(e)}), 500
+        error_msg = f"Error processing logs: {str(e)}"
+        print(f"[!] {error_msg}")
+        return jsonify({
+            "error": error_msg,
+            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        }), 500
 
 @app.route('/change_credentials', methods=['POST'])
 def change_credentials():
