@@ -173,7 +173,8 @@ threat_mitigation = {
     "breach": "Validate systems and enforce data encryption.",
     "malware": "Run antivirus scans and isolate infected systems.",
     "exploit": "Patch vulnerable systems and monitor access.",
-    "rootkit": "Perform rootkit scans and validate kernel integrity."
+    "rootkit": "Perform rootkit scans and validate kernel integrity.",
+    "brute-force": "Block IP and enforce account lockout policies."
 }
 
 # Rule-based threat patterns with severity levels

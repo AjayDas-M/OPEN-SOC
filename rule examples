@@ -1,0 +1,44 @@
+(union.*select|select.*from|drop table|--|;|' or 1=1) SQL Injection 
+curl -X POST http://127.0.0.1:5000/api/logs \
+     -H "Content-Type: application/json" \
+     -d '{"system_name": "TestSystem", "logs": {"web_logs": "User input contains: UNION SELECT * FROM users WHERE username=\'admin\' --"}}'
+
+
+sudo iptables -L -v -n
+sudo iptables -D INPUT -s 192.168.1.10 -j REJECT : remove reject rule
+
+
+curl -X POST http://127.0.0.1:5000/api/logs \
+     -H "Content-Type: application/json" \
+     -d '{"system_name": "TestSystem", "logs": {"security_logs": "Multiple failed login attempts detected from 192.168.1.10"}}'
+
+
+sudo iptables -D INPUT 1
+sudo iptables -D INPUT 1  # Run this twice to remove both rules
+
+
+sudo iptables -L INPUT --line-numbers -v -n
+
+
+ curl -X POST http://localhost:5000/api/logs   -H "Content-Type: application/json"   -d '{
+        "system_name": "TestMachine",
+        "timestamp": "2025-04-08 18:00:04",
+        "logs": {
+          "system_logs": ["many multiple failed attempts detected"],
+          "firewall_logs": [],
+          "network_logs": [],
+          "external_logs": []
+        }
+      }'
+
+
+curl -X POST http://localhost:5000/api/logs \
+-H "Content-Type: application/json" \
+-d '{
+  "system_name": "TestSystem",
+  "timestamp": "2025-04-08 18:30:00",
+  "logs": {
+    "system_logs": "sudo failed attempt from 192.168.1.101: unauthorized access detected"
+  }
+}'
+
